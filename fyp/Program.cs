@@ -21,7 +21,7 @@ namespace fyp
     {
         void MyEvent(int count)
         {
-            //Console.WriteLine("{0}\tHello World {1}", ClockTime, count);
+            Console.WriteLine("{0}\tHello World {1}", ClockTime, count);
 
             var shipment = new InboundShipment();
             shipment.inboundShipmentLines = new List<InboundShipmentLine>()
