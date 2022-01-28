@@ -36,9 +36,13 @@ namespace fyp
         //    Schedule(() => MyEvent(count + 1), TimeSpan.FromMinutes(1));
         //}
 
-        void arrival(InboundShipment shipment)
+        public int sec = 10000000;
+
+        public void arrival(InboundShipment shipment)
         {
-            Console.WriteLine("Arrival {0}", ClockTime);
+            shipment.inboundTime = ClockTime;
+            shipment.listInboundShipments();
+            //Console.WriteLine("Arrival {0}", shipment.inboundTime);
             return;
         }
 
@@ -46,10 +50,27 @@ namespace fyp
         public MySimModel()
         {
             //Schedule(() => MyEvent(1)); // schedule the initial event
-            var sec = 10000000;
-            Schedule(() => arrival(new InboundShipment()), new TimeSpan(4*sec));
-            Schedule(() => arrival(new InboundShipment()), new TimeSpan(8*sec));
-            Schedule(() => arrival(new InboundShipment()), new TimeSpan(2*sec));
+
+            var in1 = new InboundShipment();
+            var in2 = new InboundShipment();
+            var in3 = new InboundShipment();
+            
+            in1.addShipmentLine(new InboundShipmentLine(new SKU(1), 5, -1))
+               .addShipmentLine(new InboundShipmentLine(new SKU(2), 10, -1))
+               .addShipmentLine(new InboundShipmentLine(new SKU(3), 2, -1));
+
+            in2.addShipmentLine(new InboundShipmentLine(new SKU(2), 7, -1))
+               .addShipmentLine(new InboundShipmentLine(new SKU(3), 10, -1))
+               .addShipmentLine(new InboundShipmentLine(new SKU(4), 1, -1));
+
+            in3.addShipmentLine(new InboundShipmentLine(new SKU(1), 5, -1))
+               .addShipmentLine(new InboundShipmentLine(new SKU(4), 10, -1))
+               .addShipmentLine(new InboundShipmentLine(new SKU(5), 6, -1));
+
+
+            Schedule(() => arrival(in1), new TimeSpan(4*sec));
+            Schedule(() => arrival(in2), new TimeSpan(8*sec));
+            Schedule(() => arrival(in3), new TimeSpan(2*sec));
         }
     }
 }
