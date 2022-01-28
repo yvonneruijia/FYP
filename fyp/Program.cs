@@ -14,43 +14,43 @@ namespace fyp
 
             // run 15 events
             sim.Run(15);
+            Console.WriteLine("Simulation Successful...");
+
         }
     }
 
 
     internal class MySimModel : Sandbox
     {
-        //void MyEvent(int count)
-        //{
-        //    //Console.WriteLine("{0}\tHello World {1}", ClockTime, count);
-
-        //    var shipment = new InboundShipment();
-        //    shipment.inboundShipmentLines = new List<InboundShipmentLine>()
-        //    {
-        //        new InboundShipmentLine(1, new SKU(1), count),
-        //        new InboundShipmentLine(2, new SKU(2), 3)
-        //    };
-        //    shipment.listInboundShipments();
-
-        //    // Schedule a future event
-        //    Schedule(() => MyEvent(count + 1), TimeSpan.FromMinutes(1));
-        //}
 
         public int sec = 10000000;
+
+        public Storage storage;
 
         public void arrival(InboundShipment shipment)
         {
             shipment.inboundTime = ClockTime;
             shipment.listInboundShipments();
-            //Console.WriteLine("Arrival {0}", shipment.inboundTime);
-            return;
+
+            bool success = storage.assignStorage(shipment);
+            if (!success)
+            {
+                Console.WriteLine("Storage is full, exiting...");
+                Environment.Exit(0);
+            }
+
         }
 
+        public void pick(SKU sku)
+        {
+
+        }
 
         public MySimModel()
         {
-            //Schedule(() => MyEvent(1)); // schedule the initial event
+            storage = new Storage(3,3,3); // Create new storage
 
+            // Create two inbound shipments
             var in1 = new InboundShipment();
             var in2 = new InboundShipment();
             var in3 = new InboundShipment();
@@ -67,7 +67,7 @@ namespace fyp
                .addShipmentLine(new InboundShipmentLine(new SKU(4), 10, -1))
                .addShipmentLine(new InboundShipmentLine(new SKU(5), 6, -1));
 
-
+            // Schedule 3 arrival events
             Schedule(() => arrival(in1), new TimeSpan(4*sec));
             Schedule(() => arrival(in2), new TimeSpan(8*sec));
             Schedule(() => arrival(in3), new TimeSpan(2*sec));
