@@ -48,7 +48,6 @@ namespace fyp
         public int arrivalQty { get; set; }
         public int index { get; set; }
         public SKU sku { get; set; }
-        //public InboundShipment inboundShipment { get; set; }
         public override String ToString()
         {
             return String.Format("SKU {0} ArrivalQty {1} Index {2}: ", sku, arrivalQty, index);
