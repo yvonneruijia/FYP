@@ -9,7 +9,7 @@ namespace fyp
 {
     internal class Storage
     {
-        public Storage (int x, int y, int z)
+        public Storage(int x, int y, int z)
         {
             X = x; Y = y; Z = z;
             rack = new StorageLine[x, y, z];
@@ -31,6 +31,8 @@ namespace fyp
 
                 int x = 0, y = 0, z = 0;
 
+                // Inefficient, we could maintain a list of empty rack locations
+                // and select in O1 time
                 while (rack[x, y, z] != null)
                 {
                     x = new Random().Next(0, X);
@@ -47,7 +49,82 @@ namespace fyp
 
         }
 
+        public void pickStorage(OutboundOrder order)
+        {
+            foreach (var line in order.outboundOrderLines)
+            {
+                // for each shipmentline, iterate through all storage lines to pick sku
+                for (int i = 0; i < X * Y * Z; i++)
+                {
+                    // i = x + y*X + z*(X*Y)
+                    int x = i % X;
+                    int y = ((i - x) / X) % Y;
+                    int z = (i - x - y) / (X * Y);
+
+                    var stline = rack[x, y, z];
+
+                    if (stline == null)
+                    {
+                        // empty rack, continue
+                        continue;
+                    }
+
+                    if (line.sku == stline.sku)
+                    {
+                        // found a rack, pick as many qty as possible
+                        int numPicked = Math.Min(line.orderQty, stline.qty);
+                        line.orderQty -= numPicked;
+                        stline.qty -= numPicked;
+
+                        if (stline.qty == 0)
+                        {
+                            // no more item on storage line, set it to empty
+                            rack[x, y, z] = null;
+                        }
+
+                        if (line.orderQty == 0)
+                        {
+                            // finished picking the current orderline
+                            break;
+                        }
+                    }
+                }
+                if (line.orderQty != 0)
+                {
+                    Console.WriteLine("[ERROR] Not enough storage to pick!!");
+                    listStorageLines();
+                    Environment.Exit(0);
+                }
+            }
+        }
+
+        public void listStorageLines()
+        {
+            for (int i = 0; i < X * Y * Z; i++)
+            {
+                // i = x + y*X + z*(X*Y)
+                int x = i % X;
+                int y = ((i - x) / X) % Y;
+                int z = (i - x - y) / (X * Y);
+                Console.WriteLine("(x,y,z) = ({0},{1},{2}) ", x, y, z);
+
+                var stline = rack[x, y, z];
+
+                if (stline == null)
+                {
+                    // empty rack
+                    Console.WriteLine("Empty");
+                }
+                else
+                {
+                    Console.WriteLine(stline);
+                }
+
+            }
+        }
     }
+
+   
 
     internal class StorageLine
     {
@@ -61,6 +138,11 @@ namespace fyp
         public SKU sku { get; set; }
         public int qty { get; set; }
         public int weight { get; set; }
+
+        public override String ToString()
+        {
+            return String.Format("SKU {0} Qty {1} Weight{2}: ", sku, qty, weight);
+        }
 
     }
 

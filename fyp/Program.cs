@@ -45,6 +45,7 @@ namespace fyp
         {
             Console.WriteLine("Picking an order...");
             order.listOutboundOrders();
+            storage.pickStorage(order);
         }
 
         public MySimModel()

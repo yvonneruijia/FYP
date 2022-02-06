@@ -8,7 +8,7 @@ namespace fyp
 {
     internal class SKU
     {
-        public SKU (int _index)
+        public SKU(int _index)
         {
             index = _index;
         }
@@ -32,6 +32,28 @@ namespace fyp
             return String.Format("{0}", index);
         }
 
+        // implement equality comparison for SKU class
+        public bool Equals(SKU sku)
+        {
+            return index == sku.index;
+        }
 
+        public static bool operator ==(SKU lhs, SKU rhs)
+        {
+            if (lhs is null)
+            {
+                if (rhs is null)
+                {
+                    return true;
+                }
+
+                // Only the left side is null.
+                return false;
+            }
+            // Equals handles case of null on right side.
+            return lhs.Equals(rhs);
+        }
+
+        public static bool operator !=(SKU lhs, SKU rhs) => !(lhs == rhs);
     }
 }
