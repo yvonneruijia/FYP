@@ -12,7 +12,7 @@ namespace fyp
             String inboundFile = Path.Join(basePath, "Inbound.csv");
             String outboundFile = Path.Join(basePath, "Outbound.csv");
             inboundReader = new StreamReader(inboundFile);
-            outboundReader = new StreamReader(inboundFile);
+            outboundReader = new StreamReader(outboundFile);
             inboundReader.ReadLine(); // skip header
             outboundReader.ReadLine(); // skip header
             inboundBufferedLine = null;

@@ -29,6 +29,52 @@ namespace fyp
 
         public Storage storage;
 
+
+        public MySimModel()
+        {
+            storage = new Storage(3, 3, 3); // Create new storage
+
+            var io = new fileIO();
+
+            // register inbound
+            while (true)
+            {
+                var (time, inbound) = io.getNextInbound();
+                if (inbound == null)
+                {
+                    break;
+                }
+                //Console.WriteLine(time)
+                Schedule(() => arrive(inbound), time);
+            };
+
+            // register outbound
+            while (true)
+            {
+                var (time, outbound) = io.getNextOutbound();
+                if (outbound == null)
+                {
+                    break;
+                }
+                //Console.WriteLine(time)
+                Schedule(() => order(outbound), time);
+            };
+
+
+
+
+            //io.getNextOutbound();
+        }
+
+        public void order(OutboundOrder order)
+        {
+            Console.WriteLine("Picking an order...\n");
+            Debug.Assert(order != null);
+            order.outboundTime = ClockTime;
+            order.listOutboundOrders();
+            storage.pickStorage(order);
+        }
+
         public void arrive(InboundShipment shipment)
         {
             Console.WriteLine("Order arriving...\n");
@@ -43,13 +89,6 @@ namespace fyp
                 Environment.Exit(0);
             }
 
-        }
-
-        public void order(OutboundOrder order)
-        {
-            Console.WriteLine("Picking an order...\n");
-            order.listOutboundOrders();
-            storage.pickStorage(order);
         }
 
         public void generateTestInputs()
@@ -101,40 +140,5 @@ namespace fyp
 
         }
 
-        public MySimModel()
-        {
-            storage = new Storage(3,3,3); // Create new storage
-
-            var io = new fileIO();
-
-            // register inbound
-            while(true)
-            {
-                var (time, inbound) = io.getNextInbound();
-                if (inbound == null)
-                {
-                    break;
-                }
-                //Console.WriteLine(time)
-                Schedule(() => arrive(inbound), time);
-            };
-
-            // register outbound
-            while (true)
-            {
-                var (time, outbound) = io.getNextOutbound();
-                if (outbound == null)
-                {
-                    break;
-                }
-                //Console.WriteLine(time)
-                Schedule(() => order(outbound), time);
-            };
-
-
-
-
-            //io.getNextOutbound();
-        }
     }
 }
