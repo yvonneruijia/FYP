@@ -61,6 +61,7 @@ namespace fyp
                 var orderNo = int.Parse(fields[2]);
                 var sku = int.Parse(fields[3]);
                 var qty = int.Parse(fields[4]);
+                var popularity = int.Parse(fields[5]);
 
                 if (lastShipmentNo!=-1 && lastShipmentNo != shipmentNo)
                 {
@@ -68,7 +69,7 @@ namespace fyp
                     break;
                 }
 
-                shipment.addShipmentLine(new InboundShipmentLine(new SKU(sku), qty, orderNo));
+                shipment.addShipmentLine(new InboundShipmentLine(new SKU(sku), qty, orderNo, popularity));
 
                 shipmentTime = time;
                 lastShipmentNo = shipmentNo;

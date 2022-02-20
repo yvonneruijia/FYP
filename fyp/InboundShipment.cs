@@ -39,18 +39,20 @@ namespace fyp
 
     internal class InboundShipmentLine
     {
-        public InboundShipmentLine(SKU _sku, int _arrivalQty, int _index) {
+        public InboundShipmentLine(SKU _sku, int _arrivalQty, int _index=-1, int _popularity=-1) {
             sku = _sku;
             arrivalQty = _arrivalQty;
             index = _index;
+            popularity = _popularity;
         }
 
         public int arrivalQty { get; set; }
         public int index { get; set; }
         public SKU sku { get; set; }
+        public int popularity { get; set; }
         public override String ToString()
         {
-            return String.Format("SKU {0} ArrivalQty {1} Index {2}: ", sku, arrivalQty, index);
+            return String.Format("SKU {0} ArrivalQty {1} Index {2}: Popularity {3}", sku, arrivalQty, index, popularity);
         }
     }
 
