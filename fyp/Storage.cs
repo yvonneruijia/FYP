@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Diagnostics;
-using System.Collections;
+using System.Collections.Generic;
 
 namespace fyp
 {
@@ -11,6 +11,7 @@ namespace fyp
         {
             X = x; Y = y; Z = z; XA = xa; XB = xb; XC = xc; YA = ya; YB = yb; YC = yc; 
             rack = new StorageLine[x, y, z];
+            SKUToPopularity = new Dictionary<int, int>();
             //Debug.Assert(rack[1, 1, 1] == null);
         }
         internal StorageLine[,,] rack { get; set; }
@@ -26,6 +27,8 @@ namespace fyp
         public int YC { get; set; }
 
         public int capacity { get; set; }
+
+        public Dictionary<int, int> SKUToPopularity; // sku -> popularity
 
 
         public (int, int, int, int) getRangeByPopularity(int popularity)
@@ -105,6 +108,54 @@ namespace fyp
             return false;
         }
 
+        public void relocate(SKU sku, int fromPopularity, int toPopularity)
+        {
+            // find an empty slot in target popularity zone
+            var (xt_l, yt_l, xt_h, yt_h) = getRangeByPopularity(toPopularity);
+            var (xf_l, yf_l, xf_h, yf_h) = getRangeByPopularity(fromPopularity);
+
+            // First traverse the X direction
+            for (int x = xt_l; x < xt_h; x++)
+            {
+                for (int y = 0; y < yt_h; y++)
+                {
+                    for (int z = 0; z < Z; z++)
+                    {
+                        if (rack[x, y, z] == null)
+                        {
+                            // found empty target slot
+                            var line = getRelocatedStorageLine(sku, xf_l, xf_h, yf_l, yf_h);
+                            if (line == null) return; // cannot find any more sku to be relocated
+                            rack[x, y, z] = line;
+                            Console.Write("[Relocating ({0})] the following storage line...\n", fromPopularity > toPopularity ? "Promote" : "De-promote");
+                            Console.Write(line + "\n");
+                        }
+                    }
+                }
+            }
+
+            // Traverse the Y direction
+            for (int x = 0; x < xt_h; x++)
+            {
+                for (int y = yt_l; y < yt_h; y++)
+                {
+                    for (int z = 0; z < Z; z++)
+                    {
+                        if (rack[x, y, z] == null)
+                        {
+                            // found empty target slot
+                            var line = getRelocatedStorageLine(sku, xf_l, xf_h, yf_l, yf_h);
+                            if (line == null) return; // cannot find any more sku to be relocated
+                            rack[x, y, z] = line;
+                            Console.Write("[Relocating ({0})] the following storage line...\n", fromPopularity > toPopularity ? "Promote" : "De-promote");
+                            Console.Write(line + "\n");
+                        }
+                    }
+                }
+            }
+
+        }
+
         public bool assignStorage(InboundShipment shipment)
         {
             foreach (var line in shipment.inboundShipmentLines)
@@ -123,6 +174,25 @@ namespace fyp
                         Console.Write("[De-Promoting] the following shipmentline to a lower zone {0}...\n", popularity);
                         Console.Write(line + "\n");
                     }
+                }
+
+                if (SKUToPopularity.ContainsKey(line.sku.index))
+                {
+                    var recorded_popularity = -1;
+                    bool success = SKUToPopularity.TryGetValue(line.sku.index, out recorded_popularity);
+                    Debug.Assert(success);
+                    if (recorded_popularity != line.popularity)
+                    {
+                        // there is a popularity change, need relocation
+                        SKUToPopularity[line.sku.index] = line.popularity;
+                        var fromPopularity = recorded_popularity;
+                        var toPopularity = line.popularity;
+                        relocate(line.sku, fromPopularity, toPopularity);
+                    }
+                } else
+                {
+                    // no record yet, add to dict
+                    SKUToPopularity.Add(line.sku.index, popularity);
                 }
             }
             return true;
@@ -143,6 +213,8 @@ namespace fyp
                             if (storageLine.popularity == target_popularity)
                             {
                                 // we can relocate this storage line to a nearer zone
+                                Console.Write("[Promoting] the following storage line...\n");
+                                Console.Write(storageLine + "\n");
                                 rack[x, y, z] = null;
                                 return storageLine;
                             }
@@ -169,6 +241,57 @@ namespace fyp
                                 return storageLine;
                             }
                         } 
+                    }
+                }
+            }
+
+            return null;
+        }
+
+
+        public StorageLine getRelocatedStorageLine(SKU sku, int x_l, int x_h, int y_l, int y_h)
+        {
+            // First traverse the X direction
+            for (int x = x_l; x < x_h; x++)
+            {
+                for (int y = 0; y < y_h; y++)
+                {
+                    for (int z = 0; z < Z; z++)
+                    {
+                        if (rack[x, y, z] != null)
+                        {
+                            var storageLine = rack[x, y, z];
+                            if (storageLine.sku == sku)
+                            {
+                                // we can relocate this storage line to a nearer/further zone
+                                // depending on popularity chagne
+                                Console.Write("[Relocating] the following storage line...\n");
+                                rack[x, y, z] = null;
+                                return storageLine;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Traverse the Y direction
+            for (int x = 0; x < x_h; x++)
+            {
+                for (int y = y_l; y < y_h; y++)
+                {
+                    for (int z = 0; z < Z; z++)
+                    {
+                        if (rack[x, y, z] != null)
+                        {
+                            var storageLine = rack[x, y, z];
+                            if (storageLine.sku == sku)
+                            {
+                                Console.Write("[Relocating] the following storage line...\n");
+                                Console.Write(storageLine + "\n");
+                                rack[x, y, z] = null;
+                                return storageLine;
+                            }
+                        }
                     }
                 }
             }
