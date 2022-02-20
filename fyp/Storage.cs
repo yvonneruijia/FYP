@@ -27,101 +27,96 @@ namespace fyp
 
         public int capacity { get; set; }
 
+
+        public (int, int, int, int) getRangeByPopularity(int popularity)
+        {
+            int x_l = 0, x_h = 0, y_l = 0, y_h = 0;
+            if (popularity == 1)
+            {
+                // Find in (0,0) -> (XA,YA)
+                x_l = 0; x_h = XA; y_l = 0; y_h = YA;
+
+            }
+            else if (popularity == 2)
+            {
+                // Find in (XA,YA) -> (XB,YB)
+                x_l = XA; y_l = YA; x_h = XB; y_h = YB;
+
+            }
+            else if (popularity == 3)
+            {
+                // Find in (XB,YB) -> (XC,YC)
+                x_l = XB; y_l = YB; x_h = XC; y_h = YC;
+            }
+            else
+            {
+                Debug.Assert(false);
+            }
+            return (x_l, y_l, x_h, y_h);
+        }
+
+        public bool assignShipmentLineToZone(InboundShipmentLine line, int x_l, int y_l, int x_h, int y_h)
+        {
+            // First traverse the X direction
+            for (int x = x_l; x < x_h; x++)
+            {
+                for (int y = 0; y < y_h; y++)
+                {
+                    for (int z = 0; z < Z; z++)
+                    {
+                        if (rack[x, y, z] == null)
+                        {
+                            //Console.Write("{0},{1},{2}\n", x, y, z);
+                            var storageLine = new StorageLine(line.sku, line.arrivalQty, -1);
+                            rack[x, y, z] = storageLine;
+                            capacity += 1;
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            // Traverse the Y direction
+            for (int x = 0; x < x_h; x++)
+            {
+                for (int y = y_l; y < y_h; y++)
+                {
+                    for (int z = 0; z < Z; z++)
+                    {
+                        if (rack[x, y, z] == null)
+                        {
+                            //Console.Write("{0},{1},{2}\n", x, y, z);
+                            var storageLine = new StorageLine(line.sku, line.arrivalQty, -1);
+                            rack[x, y, z] = storageLine;
+                            capacity += 1;
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
         public bool assignStorage(InboundShipment shipment)
         {
-            var relocate_buffer = new ArrayList(); // this may cause overflow
-
             foreach (var line in shipment.inboundShipmentLines)
             {
                 if (capacity >= X * Y * Z) return false;
-
-                int x_l = 0, x_h = 0, y_l = 0, y_h = 0;
-                if (line.popularity == 1)
-                {
-                    // Find in (0,0) -> (XA,YA)
-                    x_l = 0; x_h = XA; y_l = 0; y_h = YA;
-
-                }
-                else if (line.popularity == 2)
-                {
-                    // Find in (XA,YA) -> (XB,YB)
-                    x_l = XA; y_l = YA; x_h = XB; y_h = YB;
-
-                }
-                else if (line.popularity == 3)
-                {
-                    // Find in (XB,YB) -> (XC,YC)
-                    x_l = XB; y_l = YB; x_h = XC; y_h = YC;
-                } else
-                {
-                    Debug.Assert(false);
-                }
-
+                
+                int popularity = line.popularity;
                 bool assigned = false;
-                for (int x = x_l; x < x_h; x++)
+                while (!assigned)
                 {
-                    for (int y = 0; y < y_h; y++)
+                    var (x_l, y_l, x_h, y_h) = getRangeByPopularity(popularity);
+                    assigned = assignShipmentLineToZone(line, x_l, y_l, x_h, y_h);
+                    if (!assigned)
                     {
-                        for (int z = 0; z < Z; z++)
-                        {
-                            if (assigned)
-                                break;
-
-                            if (rack[x, y, z] == null)
-                            {
-                                //Console.Write("{0},{1},{2}\n", x, y, z);
-                                var storageLine = new StorageLine(line.sku, line.arrivalQty, -1);
-                                rack[x, y, z] = storageLine;
-                                capacity += 1;
-                                assigned = true;
-                            }
-                            
-                        }
-                        if (assigned)
-                            break;
+                        popularity++; // If there is no space in the current zone, de-promote it
+                        Console.Write("[De-Promoting] the following shipmentline to a lower zone {0}...\n", popularity);
+                        Console.Write(line + "\n");
                     }
-                    if (assigned)
-                        break;
-                }
-
-                for (int x = 0; x < x_h; x++)
-                {
-                    for (int y = y_l; y < y_h; y++)
-                    {
-                        for (int z = 0; z < Z; z++)
-                        {
-                            if (assigned)
-                                break;
-                            if (rack[x, y, z] == null)
-                            {
-                                //Console.Write("{0},{1},{2}\n", x, y, z);
-                                var storageLine = new StorageLine(line.sku, line.arrivalQty, -1);
-                                rack[x, y, z] = storageLine;
-                                capacity += 1;
-                                assigned = true;
-                            }
-                        }
-                        if (assigned)
-                            break;
-                    }
-                    if (assigned)
-                        break;
-                }
-
-
-                if (!assigned)
-                {
-                    Console.Write("####### Sending to relocation buffer\n");
-                    relocate_buffer.Add(line);
                 }
             }
-
-            if (relocate_buffer.Count > 0)
-            {
-                //Debug.Assert(false);
-                return false;
-            }
-
             return true;
         }
 
