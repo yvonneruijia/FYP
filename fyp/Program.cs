@@ -49,19 +49,17 @@ namespace fyp
             };
 
             // register outbound
-            //while (true)
-            //{
-            //    var (time, outbound) = io.getNextOutbound();
-            //    if (outbound == null)
-            //    {
-            //        break;
-            //    }
-            //    //Console.WriteLine(time)
-            //    Schedule(() => order(outbound), time);
-            //};
+            while (true)
+            {
+                var (time, outbound) = io.getNextOutbound();
+                if (outbound == null)
+                {
+                    break;
+                }
+                //Console.WriteLine(time)
+                Schedule(() => order(outbound), time);
+            };
 
-
-            //io.getNextOutbound();
         }
 
         public void order(OutboundOrder order)

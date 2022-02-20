@@ -69,7 +69,7 @@ namespace fyp
                             //Console.Write("{0},{1},{2}\n", x, y, z);
                             var storageLine = new StorageLine(line.sku, line.arrivalQty, -1);
                             rack[x, y, z] = storageLine;
-                            capacity += 1;
+                            capacity ++;
                             return true;
                         }
                     }
@@ -88,7 +88,7 @@ namespace fyp
                             //Console.Write("{0},{1},{2}\n", x, y, z);
                             var storageLine = new StorageLine(line.sku, line.arrivalQty, -1);
                             rack[x, y, z] = storageLine;
-                            capacity += 1;
+                            capacity ++;
                             return true;
                         }
                     }
@@ -151,6 +151,7 @@ namespace fyp
                         {
                             // no more item on storage line, set it to empty
                             rack[x, y, z] = null;
+                            capacity--;
                         }
 
                         if (line.orderQty == 0)
