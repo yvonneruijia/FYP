@@ -63,12 +63,15 @@ namespace fyp
                 var qty = int.Parse(fields[4]);
                 var popularity = int.Parse(fields[5]);
 
+                
+
                 if (lastShipmentNo!=-1 && lastShipmentNo != shipmentNo)
                 {
                     // next line is a new shipment
                     break;
                 }
 
+                //Console.Write("{0}\n", shipmentNo);
                 shipment.addShipmentLine(new InboundShipmentLine(new SKU(sku), qty, orderNo, popularity));
 
                 shipmentTime = time;

@@ -32,7 +32,7 @@ namespace fyp
 
         public MySimModel()
         {
-            storage = new Storage(3, 3, 3); // Create new storage
+            storage = new Storage(5,5,1,2,2,3,3,5,5); // Create new storage
 
             var io = new fileIO();
 
@@ -49,18 +49,16 @@ namespace fyp
             };
 
             // register outbound
-            while (true)
-            {
-                var (time, outbound) = io.getNextOutbound();
-                if (outbound == null)
-                {
-                    break;
-                }
-                //Console.WriteLine(time)
-                Schedule(() => order(outbound), time);
-            };
-
-
+            //while (true)
+            //{
+            //    var (time, outbound) = io.getNextOutbound();
+            //    if (outbound == null)
+            //    {
+            //        break;
+            //    }
+            //    //Console.WriteLine(time)
+            //    Schedule(() => order(outbound), time);
+            //};
 
 
             //io.getNextOutbound();
@@ -85,7 +83,7 @@ namespace fyp
             bool success = storage.assignStorage(shipment);
             if (!success)
             {
-                Console.WriteLine("Storage is full, exiting...");
+                Console.WriteLine("Storage is full / need relocation, exiting...");
                 Environment.Exit(0);
             }
 

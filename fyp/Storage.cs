@@ -1,17 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Diagnostics;
+using System.Collections;
 
 namespace fyp
 {
     internal class Storage
     {
-        public Storage(int x, int y, int z)
+        public Storage(int x, int y, int z, int xa, int ya, int xb, int yb, int xc, int yc)
         {
-            X = x; Y = y; Z = z;
+            X = x; Y = y; Z = z; XA = xa; XB = xb; XC = xc; YA = ya; YB = yb; YC = yc; 
             rack = new StorageLine[x, y, z];
             //Debug.Assert(rack[1, 1, 1] == null);
         }
@@ -20,33 +18,111 @@ namespace fyp
         public int X { get; set; }
         public int Y { get; set; }
         public int Z { get; set; }
+        public int XA { get; set; }
+        public int YA { get; set; }
+        public int XB { get; set; }
+        public int YB { get; set; }
+        public int XC { get; set; }
+        public int YC { get; set; }
+
         public int capacity { get; set; }
 
         public bool assignStorage(InboundShipment shipment)
         {
+            var relocate_buffer = new ArrayList(); // this may cause overflow
 
             foreach (var line in shipment.inboundShipmentLines)
             {
                 if (capacity >= X * Y * Z) return false;
 
-                int x = 0, y = 0, z = 0;
-
-                // Inefficient, we could maintain a list of empty rack locations
-                // and select in O1 time
-                while (rack[x, y, z] != null)
+                int x_l = 0, x_h = 0, y_l = 0, y_h = 0;
+                if (line.popularity == 1)
                 {
-                    x = new Random().Next(0, X);
-                    y = new Random().Next(0, Y);
-                    z = new Random().Next(0, Z);
+                    // Find in (0,0) -> (XA,YA)
+                    x_l = 0; x_h = XA; y_l = 0; y_h = YA;
+
+                }
+                else if (line.popularity == 2)
+                {
+                    // Find in (XA,YA) -> (XB,YB)
+                    x_l = XA; y_l = YA; x_h = XB; y_h = YB;
+
+                }
+                else if (line.popularity == 3)
+                {
+                    // Find in (XB,YB) -> (XC,YC)
+                    x_l = XB; y_l = YB; x_h = XC; y_h = YC;
+                } else
+                {
+                    Debug.Assert(false);
                 }
 
-                var storageLine = new StorageLine(line.sku, line.arrivalQty, -1);
-                rack[x, y, z] = storageLine;
-                capacity += 1;
+                bool assigned = false;
+                for (int x = x_l; x < x_h; x++)
+                {
+                    for (int y = 0; y < y_h; y++)
+                    {
+                        for (int z = 0; z < Z; z++)
+                        {
+                            if (assigned)
+                                break;
+
+                            if (rack[x, y, z] == null)
+                            {
+                                //Console.Write("{0},{1},{2}\n", x, y, z);
+                                var storageLine = new StorageLine(line.sku, line.arrivalQty, -1);
+                                rack[x, y, z] = storageLine;
+                                capacity += 1;
+                                assigned = true;
+                            }
+                            
+                        }
+                        if (assigned)
+                            break;
+                    }
+                    if (assigned)
+                        break;
+                }
+
+                for (int x = 0; x < x_h; x++)
+                {
+                    for (int y = y_l; y < y_h; y++)
+                    {
+                        for (int z = 0; z < Z; z++)
+                        {
+                            if (assigned)
+                                break;
+                            if (rack[x, y, z] == null)
+                            {
+                                //Console.Write("{0},{1},{2}\n", x, y, z);
+                                var storageLine = new StorageLine(line.sku, line.arrivalQty, -1);
+                                rack[x, y, z] = storageLine;
+                                capacity += 1;
+                                assigned = true;
+                            }
+                        }
+                        if (assigned)
+                            break;
+                    }
+                    if (assigned)
+                        break;
+                }
+
+
+                if (!assigned)
+                {
+                    Console.Write("####### Sending to relocation buffer\n");
+                    relocate_buffer.Add(line);
+                }
+            }
+
+            if (relocate_buffer.Count > 0)
+            {
+                //Debug.Assert(false);
+                return false;
             }
 
             return true;
-
         }
 
         public void pickStorage(OutboundOrder order)
