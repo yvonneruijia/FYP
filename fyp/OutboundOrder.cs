@@ -26,11 +26,11 @@ namespace fyp
 
         public void listOutboundOrders()
         {
-            Console.WriteLine("Time of order: {0}", outboundTime);
+            //Console.WriteLine("Time of order: {0}", outboundTime);
 
             foreach (var line in outboundOrderLines)
             {
-                Console.WriteLine(line);
+                //Console.WriteLine(line);
             }
         }
     }

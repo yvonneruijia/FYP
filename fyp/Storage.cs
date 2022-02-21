@@ -129,8 +129,8 @@ namespace fyp
                             var line = getRelocatedStorageLine(sku, xf_l, xf_h, yf_l, yf_h);
                             if (line == null) return; // cannot find any more sku to be relocated
                             rack[x, y, z] = line;
-                            Console.Write("[Relocating ({0})] the following storage line...\n", fromPopularity > toPopularity ? "Promote" : "De-promote");
-                            Console.Write(line + "\n");
+                            //Console.Write("[Relocating ({0})] the following storage line...\n", fromPopularity > toPopularity ? "Promote" : "De-promote");
+                            //Console.Write(line + "\n");
                         }
                     }
                 }
@@ -149,8 +149,8 @@ namespace fyp
                             var line = getRelocatedStorageLine(sku, xf_l, xf_h, yf_l, yf_h);
                             if (line == null) return; // cannot find any more sku to be relocated
                             rack[x, y, z] = line;
-                            Console.Write("[Relocating ({0})] the following storage line...\n", fromPopularity > toPopularity ? "Promote" : "De-promote");
-                            Console.Write(line + "\n");
+                            //Console.Write("[Relocating ({0})] the following storage line...\n", fromPopularity > toPopularity ? "Promote" : "De-promote");
+                            //Console.Write(line + "\n");
                         }
                     }
                 }
@@ -173,8 +173,8 @@ namespace fyp
                     if (!assigned)
                     {
                         popularity++; // If there is no space in the current zone, de-promote it
-                        Console.Write("[De-Promoting] the following shipmentline to a lower zone {0}...\n", popularity);
-                        Console.Write(line + "\n");
+                        //Console.Write("[De-Promoting] the following shipmentline to a lower zone {0}...\n", popularity);
+                        //Console.Write(line + "\n");
                     }
                 }
 
@@ -190,6 +190,9 @@ namespace fyp
                         var fromPopularity = recorded_popularity;
                         var toPopularity = line.popularity;
                         relocate(line.sku, fromPopularity, toPopularity);
+                        //Console.Write("[Popularity Change - Relocation]");
+                        //Console.Write(line + "\n");
+                        //Debug.Assert(false);
                     }
                 } else
                 {
@@ -241,8 +244,8 @@ namespace fyp
                             if (storageLine.popularity == target_popularity)
                             {
                                 // we can relocate this storage line to a nearer zone
-                                Console.Write("[Promoting] the following storage line...\n");
-                                Console.Write(storageLine + "\n");
+                                //Console.Write("[Promoting] the following storage line...\n");
+                                //Console.Write(storageLine + "\n");
                                 rack[x, y, z] = null;
                                 return storageLine;
                             }
@@ -263,8 +266,8 @@ namespace fyp
                             var storageLine = rack[x, y, z];
                             if (storageLine.popularity == target_popularity)
                             {
-                                Console.Write("[Promoting] the following storage line...\n");
-                                Console.Write(storageLine + "\n");
+                                //Console.Write("[Promoting] the following storage line...\n");
+                                //Console.Write(storageLine + "\n");
                                 rack[x, y, z] = null;
                                 return storageLine;
                             }
@@ -293,7 +296,7 @@ namespace fyp
                             {
                                 // we can relocate this storage line to a nearer/further zone
                                 // depending on popularity chagne
-                                Console.Write("[Relocating] the following storage line...\n");
+                                //Console.Write("[Relocating] the following storage line...\n");
                                 rack[x, y, z] = null;
                                 return storageLine;
                             }
@@ -314,8 +317,8 @@ namespace fyp
                             var storageLine = rack[x, y, z];
                             if (storageLine.sku == sku)
                             {
-                                Console.Write("[Relocating] the following storage line...\n");
-                                Console.Write(storageLine + "\n");
+                                //Console.Write("[Relocating] the following storage line...\n");
+                                //Console.Write(storageLine + "\n");
                                 rack[x, y, z] = null;
                                 return storageLine;
                             }
@@ -327,7 +330,7 @@ namespace fyp
             return null;
         }
 
-        public void relocateFromLowerZone(int cur_x, int cur_y, int cur_z)
+        public bool relocateFromLowerZone(int cur_x, int cur_y, int cur_z)
         {
             int zone_popularity = getPopularityByLoc(cur_x, cur_y, cur_z);
             Debug.Assert(zone_popularity > 0);
@@ -338,11 +341,13 @@ namespace fyp
                 var relocatedStorageLine = getRelocatedStorageLine(zone_popularity, x_l, x_h, y_l, y_h);
                 if (relocatedStorageLine != null)
                 {
-                    Console.Write("[Promoting] the following storage line...\n");
-                    Console.Write(relocatedStorageLine + "\n");
+                    //Console.Write("[Promoting] the following storage line...\n");
+                    //Console.Write(relocatedStorageLine + "\n");
                     rack[cur_x, cur_y, cur_z] = relocatedStorageLine;
+                    return true;
                 }
             }
+            return false;
         }
 
         public void pickStorage(OutboundOrder order)
@@ -384,6 +389,7 @@ namespace fyp
                             {
                                 // relocation from lower zone to here
                                 relocateFromLowerZone(x, y, z);
+                                i--;
                             }
 
                         }
@@ -412,14 +418,14 @@ namespace fyp
                 int x = i % X;
                 int y = ((i - x) / X) % Y;
                 int z = (i - x - y) / (X * Y);
-                Console.WriteLine("(x,y,z) = ({0},{1},{2}) ", x, y, z);
+                //Console.WriteLine("(x,y,z) = ({0},{1},{2}) ", x, y, z);
 
                 var stline = rack[x, y, z];
 
                 if (stline == null)
                 {
                     // empty rack
-                    Console.WriteLine("Empty");
+                    //Console.WriteLine("Empty");
                 }
                 else
                 {

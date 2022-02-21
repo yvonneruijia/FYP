@@ -11,14 +11,25 @@ namespace fyp
         static void Main(string[] args)
         {
             // construct the model
-            var sim = new MySimModel();
+            var xa = new int[] { 1, 3, 2, 5, 2 };
+            var ya = new int[] { 2, 1, 3, 3, 4 };
+            var xb = new int[] { 5, 4, 3, 6, 4 };
+            var yb = new int[] { 5, 4, 5, 5, 7 };
+            var xc = new int[] { 10,10,10,10,10 };
+            var yc = new int[] { 10,10,10,10,10 };
+            for (int i = 0; i < xa.Length; i++)
+            {
+                var sim = new MySimModel(xa[i],ya[i],xb[i],yb[i],xc[i],yc[i],true);
+                //var sim = new MySimModel(i,i,i,i,i,i,false);
+                // run 2000 events
+                Console.WriteLine("[SIM STARTS] (({0},{1}),({2},{3}),({4},{5}))\n",xa[i],ya[i],xb[i],yb[i],xc[i],yc[i]);
+                sim.Run(5000); //update this when there's more arrival and outbound events
+                Console.WriteLine("[STATS] Total Distance Travelled: {0}\n", sim.getTotalDistanceTravelled());
+                Console.WriteLine("[SIM ENDS] Run {0} events", sim.CountEvent);
 
-            // run 1000 events
-            Console.WriteLine("Simulating 1000 events...\n");
-            sim.Run(1000);
+            }
+            Console.WriteLine("[PROGRAM ENDS]");
 
-            Console.WriteLine("[STATS] Total Distance Travelled: {0}\n", sim.getTotalDistanceTravelled());
-            Console.WriteLine("Simulation Successful...");
 
         }
     }
@@ -30,11 +41,12 @@ namespace fyp
         public int sec = 10000000;
 
         public Storage storage;
-        public bool isClassBased=true;
-
-        public MySimModel()
+        public bool isClassBased;
+        public int CountEvent = 0;
+        public MySimModel(int xa,int ya,int xb, int yb, int xc, int yc,bool _isClassBased)
         {
-            storage = new Storage(10,10,10,1,1,5,5,10,10,isClassBased); // Create new storage
+            isClassBased = _isClassBased;
+            storage = new Storage(10,10,10,xa,ya,xb,yb,xc,yc,isClassBased); // Create new storage
 
             var io = new fileIO();
 
@@ -66,19 +78,21 @@ namespace fyp
 
         public void order(OutboundOrder order)
         {
-            Console.WriteLine("Picking an order...\n");
+            //Console.WriteLine("Picking an order...\n");
             Debug.Assert(order != null);
             order.outboundTime = ClockTime;
             order.listOutboundOrders();
             storage.pickStorage(order);
+            CountEvent++;
         }
 
         public void arrive(InboundShipment shipment)
         {
-            Console.WriteLine("Order arriving...\n");
+            //Console.WriteLine("Order arriving...\n");
             Debug.Assert(shipment != null);
             shipment.inboundTime = ClockTime;
             shipment.listInboundShipments();
+            CountEvent++;
             bool success = false;
             if (isClassBased)
             {

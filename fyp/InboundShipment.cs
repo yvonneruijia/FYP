@@ -28,11 +28,11 @@ namespace fyp
 
         public void listInboundShipments()
         {
-            Console.WriteLine("Time of arrival: {0}", inboundTime);
+            //Console.WriteLine("Time of arrival: {0}", inboundTime);
 
             foreach (var line in inboundShipmentLines)
             {
-                Console.WriteLine(line);
+                //Console.WriteLine(line);
             }
         }
     }
