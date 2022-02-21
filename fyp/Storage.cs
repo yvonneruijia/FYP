@@ -159,43 +159,25 @@ namespace fyp
 
         public bool assignStorage(InboundShipment shipment)
         {
+
             foreach (var line in shipment.inboundShipmentLines)
             {
                 if (capacity >= X * Y * Z) return false;
-                
-                int popularity = line.popularity;
-                bool assigned = false;
-                while (!assigned)
+
+                int x = 0, y = 0, z = 0;
+
+                while (rack[x, y, z] != null)
                 {
-                    var (x_l, y_l, x_h, y_h) = getRangeByPopularity(popularity);
-                    assigned = assignShipmentLineToZone(line, x_l, y_l, x_h, y_h);
-                    if (!assigned)
-                    {
-                        popularity++; // If there is no space in the current zone, de-promote it
-                        Console.Write("[De-Promoting] the following shipmentline to a lower zone {0}...\n", popularity);
-                        Console.Write(line + "\n");
-                    }
+                    x = new Random().Next(0, X);
+                    y = new Random().Next(0, Y);
+                    z = new Random().Next(0, Z);
                 }
 
-                if (SKUToPopularity.ContainsKey(line.sku.index))
-                {
-                    var recorded_popularity = -1;
-                    bool success = SKUToPopularity.TryGetValue(line.sku.index, out recorded_popularity);
-                    Debug.Assert(success);
-                    if (recorded_popularity != line.popularity)
-                    {
-                        // there is a popularity change, need relocation
-                        SKUToPopularity[line.sku.index] = line.popularity;
-                        var fromPopularity = recorded_popularity;
-                        var toPopularity = line.popularity;
-                        relocate(line.sku, fromPopularity, toPopularity);
-                    }
-                } else
-                {
-                    // no record yet, add to dict
-                    SKUToPopularity.Add(line.sku.index, popularity);
-                }
+                var storageLine = new StorageLine(line.sku, line.arrivalQty, -1,-1);
+                rack[x, y, z] = storageLine;
+                capacity += 1;
             }
+
             return true;
         }
 
@@ -354,7 +336,7 @@ namespace fyp
                             capacity--;
 
                             // relocation from lower zone to here
-                            relocateFromLowerZone(x,y,z);
+                            // relocateFromLowerZone(x,y,z);
                         }
 
                         if (line.orderQty == 0)
