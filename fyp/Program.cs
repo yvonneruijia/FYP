@@ -30,11 +30,11 @@ namespace fyp
         public int sec = 10000000;
 
         public Storage storage;
-
+        public bool isClassBased=true;
 
         public MySimModel()
         {
-            storage = new Storage(10,10,10,2,2,5,5,10,10); // Create new storage
+            storage = new Storage(10,10,10,1,1,5,5,10,10,isClassBased); // Create new storage
 
             var io = new fileIO();
 
@@ -79,8 +79,16 @@ namespace fyp
             Debug.Assert(shipment != null);
             shipment.inboundTime = ClockTime;
             shipment.listInboundShipments();
+            bool success = false;
+            if (isClassBased)
+            {
+                success = storage.assignStorageClassBased(shipment);
+            }
+            else
+            {
+                success = storage.assignStorageRandom(shipment);
+            }
 
-            bool success = storage.assignStorage(shipment);
             if (!success)
             {
                 Console.WriteLine("Storage is full / need relocation, exiting...");

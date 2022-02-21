@@ -7,10 +7,11 @@ namespace fyp
 {
     internal class Storage
     {
-        public Storage(int x, int y, int z, int xa, int ya, int xb, int yb, int xc, int yc)
+        public Storage(int x, int y, int z, int xa, int ya, int xb, int yb, int xc, int yc, bool _isClassBased)
         {
             X = x; Y = y; Z = z; XA = xa; XB = xb; XC = xc; YA = ya; YB = yb; YC = yc;
             totalDistance = 0;
+            isClassBased = _isClassBased;
             rack = new StorageLine[x, y, z];
             SKUToPopularity = new Dictionary<int, int>();
             //Debug.Assert(rack[1, 1, 1] == null);
@@ -28,7 +29,7 @@ namespace fyp
         public int YC { get; set; }
         public int totalDistance { get; set; }
         public int capacity { get; set; }
-
+        public bool isClassBased { get; set; }
         public Dictionary<int, int> SKUToPopularity; // sku -> popularity
 
 
@@ -157,7 +158,7 @@ namespace fyp
 
         }
 
-        public bool assignStorage(InboundShipment shipment)
+        public bool assignStorageClassBased(InboundShipment shipment)
         {
             foreach (var line in shipment.inboundShipmentLines)
             {
@@ -198,6 +199,32 @@ namespace fyp
             }
             return true;
         }
+
+        public bool assignStorageRandom(InboundShipment shipment)
+        {
+
+            foreach (var line in shipment.inboundShipmentLines)
+            {
+                if (capacity >= X * Y * Z) return false;
+
+                int x = 0, y = 0, z = 0;
+
+                while (rack[x, y, z] != null)
+                {
+                    x = new Random().Next(0, X);
+                    y = new Random().Next(0, Y);
+                    z = new Random().Next(0, Z);
+                }
+
+                var storageLine = new StorageLine(line.sku, line.arrivalQty, -1, -1);
+                rack[x, y, z] = storageLine;
+                capacity += 1;
+            }
+
+            return true;
+        }
+
+
 
         public StorageLine getRelocatedStorageLine(int target_popularity, int x_l, int x_h, int y_l, int y_h)
         {
@@ -353,8 +380,12 @@ namespace fyp
                             rack[x, y, z] = null;
                             capacity--;
 
-                            // relocation from lower zone to here
-                            relocateFromLowerZone(x,y,z);
+                            if (isClassBased)
+                            {
+                                // relocation from lower zone to here
+                                relocateFromLowerZone(x, y, z);
+                            }
+
                         }
 
                         if (line.orderQty == 0)
