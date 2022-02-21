@@ -16,6 +16,8 @@ namespace fyp
             // run 1000 events
             Console.WriteLine("Simulating 1000 events...\n");
             sim.Run(1000);
+
+            Console.WriteLine("[STATS] Total Distance Travelled: {0}\n", sim.getTotalDistanceTravelled());
             Console.WriteLine("Simulation Successful...");
 
         }
@@ -85,6 +87,11 @@ namespace fyp
                 Environment.Exit(0);
             }
 
+        }
+
+        public int getTotalDistanceTravelled()
+        {
+            return storage.totalDistance;
         }
 
         public void generateTestInputs()

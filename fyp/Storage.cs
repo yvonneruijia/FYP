@@ -9,7 +9,8 @@ namespace fyp
     {
         public Storage(int x, int y, int z, int xa, int ya, int xb, int yb, int xc, int yc)
         {
-            X = x; Y = y; Z = z; XA = xa; XB = xb; XC = xc; YA = ya; YB = yb; YC = yc; 
+            X = x; Y = y; Z = z; XA = xa; XB = xb; XC = xc; YA = ya; YB = yb; YC = yc;
+            totalDistance = 0;
             rack = new StorageLine[x, y, z];
             SKUToPopularity = new Dictionary<int, int>();
             //Debug.Assert(rack[1, 1, 1] == null);
@@ -25,7 +26,7 @@ namespace fyp
         public int YB { get; set; }
         public int XC { get; set; }
         public int YC { get; set; }
-
+        public int totalDistance { get; set; }
         public int capacity { get; set; }
 
         public Dictionary<int, int> SKUToPopularity; // sku -> popularity
@@ -343,6 +344,8 @@ namespace fyp
                         int numPicked = Math.Min(line.orderQty, stline.qty);
                         line.orderQty -= numPicked;
                         stline.qty -= numPicked;
+                        totalDistance += x + y + z;
+
 
                         if (stline.qty == 0)
                         {
