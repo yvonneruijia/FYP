@@ -34,7 +34,7 @@ namespace fyp
 
         public MySimModel()
         {
-            storage = new Storage(5,5,1,2,2,3,3,5,5); // Create new storage
+            storage = new Storage(10,10,10,2,2,5,5,10,10); // Create new storage
 
             var io = new fileIO();
 
