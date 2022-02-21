@@ -349,7 +349,7 @@ namespace fyp
                 if (line.orderQty != 0)
                 {
                     Console.WriteLine("[ERROR] Not enough storage to pick!!");
-                    listStorageLines();
+                    // listStorageLines();
                     Environment.Exit(0);
                 }
             }
